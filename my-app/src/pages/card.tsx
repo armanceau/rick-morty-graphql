@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 import "./card.css";
 
 interface CardProps {
@@ -10,8 +10,13 @@ interface CardProps {
 const Card = ({ name, image, id }: CardProps) => {
   return (
     <div className="card">
-      <img className="card-img" src={image} alt={name} />
-      <h3>{name}</h3>
+      <img src={image ?? ""} className="card-img" alt={name} />
+      <div>{name}</div>
+      <div>
+        <Link to={id!} key={id}>
+          Info
+        </Link>
+      </div>
     </div>
   );
 };
