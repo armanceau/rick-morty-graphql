@@ -1,7 +1,7 @@
 import "./App.css";
 import { useQuery } from "@apollo/client";
 import { graphql } from "./gql";
-import { Link } from "react-router";
+import Card from "./pages/card";
 
 const GET_CHARACTERS = graphql(`
   query getCharacters($page: Int) {
@@ -32,6 +32,7 @@ function App() {
 
   return (
     <>
+      <h1>Rick & Morty API 🚀</h1>
       {data.characters?.info?.prev && (
         <button onClick={() => refetch({ page: data.characters?.info?.prev })}>
           Page précédente
@@ -43,20 +44,19 @@ function App() {
         </button>
       )}
       <>
-        <ul>
+        <div className="card-container">
           {(data.characters?.results ?? [])
             .filter((el) => el !== null)
             .map((character) => {
               return (
-                <Link to={character.id!} key={character.id}>
-                  <li>
-                    <img src={character.image ?? ""} />
-                    {character.name}
-                  </li>
-                </Link>
+                <Card
+                  id={character.id!}
+                  name={character.name!}
+                  image={character.image!}
+                />
               );
             })}
-        </ul>
+        </div>
       </>
     </>
   );

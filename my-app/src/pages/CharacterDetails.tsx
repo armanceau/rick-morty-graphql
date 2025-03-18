@@ -1,6 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { graphql } from "../gql";
 import { useParams } from "react-router";
+import "./CharacterDetails.css";
 
 const GET_CHARACTER = graphql(`
   query GetCharacter($id: ID!) {
@@ -32,10 +33,24 @@ const CharacterDetails = () => {
   return (
     <div>
       <h2>{character.name}</h2>
-      <img src={character.image ?? ""} />
-      <p>{character.status}</p>
-      <p>{character.species}</p>
-      <p>{character.gender}</p>
+      <img className="img-detail" src={character.image ?? ""} />
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Species</th>
+            <th>Gender</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>{character.status}</td>
+            <td>{character.species}</td>
+            <td>{character.gender}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };
