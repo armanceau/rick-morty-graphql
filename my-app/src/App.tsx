@@ -1,58 +1,63 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import Card from "./components/card";
-import { ApolloClient, InMemoryCache, HttpLink, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
+import { graphql } from "./gql";
+import { Link } from "react-router";
 
-const client = new ApolloClient({
-  link: new HttpLink({ uri: "https://rickandmortyapi.com/graphql" }),
-  cache: new InMemoryCache(),
-});
-
-interface Character {
-  id: string;
-  name: string;
-  image: string;
-}
-
-interface CharactersData {
-  characters: {
-    results: Character[];
-  };
-}
+const GET_CHARACTERS = graphql(`
+  query getCharacters($page: Int) {
+    characters(page: $page) {
+      info {
+        next
+        prev
+      }
+      results {
+        id
+        name
+        image
+      }
+    }
+  }
+`);
 
 function App() {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  useEffect(() => {
-    client
-      .query<CharactersData>({
-        query: gql`
-          query getCharacters {
-            characters {
-              results {
-                id
-                name
-                image
-              }
-            }
-          }
-        `,
-      })
-      .then((result) => setCharacters(result.data.characters.results))
-      .catch((error) => console.error(error));
-  }, []);
+  const { data, error, loading, refetch } = useQuery(GET_CHARACTERS);
+
+  if (!data || loading) {
+    return <>Loading...</>;
+  }
+
+  if (error) {
+    return <>Error!</>;
+  }
 
   return (
     <>
-      <h1>Rick & Morty</h1>
-      <div className="card-container">
-        {characters.map((character) => (
-          <Card
-            key={character.id}
-            name={character.name}
-            image={character.image}
-          />
-        ))}
-      </div>
+      {data.characters?.info?.prev && (
+        <button onClick={() => refetch({ page: data.characters?.info?.prev })}>
+          Page précédente
+        </button>
+      )}
+      {data.characters?.info?.next && (
+        <button onClick={() => refetch({ page: data.characters?.info?.next })}>
+          Page suivante
+        </button>
+      )}
+      <>
+        <ul>
+          {(data.characters?.results ?? [])
+            .filter((el) => el !== null)
+            .map((character) => {
+              return (
+                <Link to={character.id!} key={character.id}>
+                  <li>
+                    <img src={character.image ?? ""} />
+                    {character.name}
+                  </li>
+                </Link>
+              );
+            })}
+        </ul>
+      </>
     </>
   );
 }
