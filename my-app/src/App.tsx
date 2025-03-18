@@ -1,35 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import Card from "./components/card";
+import { ApolloClient, InMemoryCache, HttpLink, gql } from "@apollo/client";
+
+const client = new ApolloClient({
+  link: new HttpLink({ uri: "https://rickandmortyapi.com/graphql" }),
+  cache: new InMemoryCache(),
+});
+
+interface Character {
+  id: string;
+  name: string;
+  image: string;
+}
+
+interface CharactersData {
+  characters: {
+    results: Character[];
+  };
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [characters, setCharacters] = useState<Character[]>([]);
+  useEffect(() => {
+    client
+      .query<CharactersData>({
+        query: gql`
+          query getCharacters {
+            characters {
+              results {
+                id
+                name
+                image
+              }
+            }
+          }
+        `,
+      })
+      .then((result) => setCharacters(result.data.characters.results))
+      .catch((error) => console.error(error));
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>Rick & Morty</h1>
+      <div className="card-container">
+        {characters.map((character) => (
+          <Card
+            key={character.id}
+            name={character.name}
+            image={character.image}
+          />
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
